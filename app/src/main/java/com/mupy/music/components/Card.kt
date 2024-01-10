@@ -1,6 +1,8 @@
 package com.mupy.music.components
 
-import android.media.MediaPlayer
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -22,20 +24,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.mupy.music.models.Music
-import com.mupy.music.models.PlayListData
 import com.mupy.music.screen.ContextMain
 import com.mupy.music.ui.theme.ColorWhite
 import com.mupy.music.ui.theme.TextColor2
 import com.mupy.music.ui.theme.WhiteTransparent
+import com.mupy.music.utils.PlayerMusic
 import com.mupy.music.utils.Utils
 import java.io.File
 
+@RequiresApi(Build.VERSION_CODES.P)
 @Composable
 fun Card(file: File, id: Int, navController: NavHostController, viewModel: ContextMain) {
     val utils = Utils()
@@ -43,9 +47,11 @@ fun Card(file: File, id: Int, navController: NavHostController, viewModel: Conte
     var enable by remember {
         mutableStateOf(true)
     }
-    val music = utils.setMusic(id, file.path)
-    val mediaPlayer: MediaPlayer? by viewModel.mediaPlayer.observeAsState(MediaPlayer())
+    val music: Music = utils.setMusic(id, file.path).let {
+        it ?: Music(0, "", "", "", "", "",null)
+    }
     val musicView: Music? by viewModel.music.observeAsState(null)
+    val player by viewModel.player.observeAsState(PlayerMusic(mutableListOf()))
 
     
     val background =
@@ -58,32 +64,15 @@ fun Card(file: File, id: Int, navController: NavHostController, viewModel: Conte
             .padding(end = 8.dp),
         onClick = {
             enable = false
-            if (file.name == "${musicView?.title}.mp4") {
-                if (!mediaPlayer!!.isPlaying) {
-                    if(mediaPlayer!!.currentPosition / 1000 < 1) {
-                        viewModel.setMediaPlayer()
-                        mediaPlayer?.setDataSource(file.path)
-                        mediaPlayer?.prepare()
-                        mediaPlayer?.start()
-                        viewModel.startTime()
-                        viewModel.setPause(mediaPlayer!!.isPlaying)
-                    }else{
-                        mediaPlayer?.start()
-                        viewModel.setPause(mediaPlayer!!.isPlaying)
-                    }
-                }
-                navController.navigate("music")
+            if(!player.isPlaying() && music.title == musicView?.title){
+                player.start()
+            }else {
+                player.open(id)?.let { viewModel.setMusic(it) }
+                player.start()
             }
-            else {
-                viewModel.setMediaPlayer()
-                mediaPlayer?.setDataSource(file.path)
-                mediaPlayer?.prepare()
-                mediaPlayer?.start()
-                viewModel.startTime()
-                viewModel.setPause(mediaPlayer!!.isPlaying)
-                viewModel.setMusic(music)
-                navController.navigate("music")
-            }
+            navController.navigate("music")
+            viewModel.setPause(player.isPlaying())
+            viewModel.startTime()
             enable = true
         },
         colors = background,
@@ -91,12 +80,14 @@ fun Card(file: File, id: Int, navController: NavHostController, viewModel: Conte
         shape = RectangleShape
     ) {
         Column {
-            if (music.url.isNotBlank()) {
-                AsyncImage(
-                    model = music.thumb,
+            if (music.bitImage != null) {
+                Image(
+                    bitmap = music.bitImage.asImageBitmap(),
                     contentDescription = null,
                     modifier = Modifier.fillMaxWidth()
                 )
+            } else if(music.thumb.isNotBlank()) {
+                AsyncImage(model = music.thumb, contentDescription = music.title, modifier = Modifier.fillMaxWidth())
             } else {
                 Box(
                     modifier = Modifier

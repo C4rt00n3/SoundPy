@@ -1,6 +1,8 @@
 package com.mupy.music.components
 
-import android.media.MediaPlayer
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -8,21 +10,23 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -32,63 +36,64 @@ import com.mupy.music.models.Music
 import com.mupy.music.screen.ContextMain
 import com.mupy.music.ui.theme.BrandColor
 import com.mupy.music.ui.theme.ColorWhite
-import com.mupy.music.ui.theme.LineColor
 import com.mupy.music.ui.theme.TextColor2
-import com.mupy.music.ui.theme.TrackColor
-import com.mupy.music.utils.Utils
-import java.io.File
+import com.mupy.music.ui.theme.WhiteTransparent
+import com.mupy.music.utils.PlayerMusic
 
+@RequiresApi(Build.VERSION_CODES.P)
 @Composable
 fun Player(viewModel: ContextMain, padding: PaddingValues, navHostController: NavHostController) {
     val pause: Boolean by viewModel.pause.observeAsState(false)
-    val mediaPlayer: MediaPlayer? by viewModel.mediaPlayer.observeAsState(MediaPlayer())
-    val music: Music by viewModel.music.observeAsState(Music(0, "", "", "", ""))
-    val musics: MutableList<File> by viewModel.musics.observeAsState(mutableListOf())
-    val currentPosition by viewModel.currentPosition.observeAsState(0)
+    val music: Music by viewModel.music.observeAsState(Music(0, "", "", "", "", "",null))
+    val player: PlayerMusic by viewModel.player.observeAsState(PlayerMusic(mutableListOf()))
+    val reapt by viewModel.reapt.observeAsState(false)
+    val loading by viewModel.loading.observeAsState(true)
 
-    val progress = (currentPosition.toFloat() / 1000f) / (mediaPlayer!!.duration.toFloat() / 1000f)
+    if (pause && !reapt) player.setOnCompletionListener {
+        player.next()?.let {
+            viewModel.setMusic(it)
+        }
+    }
+    else player.reapt()
 
-    if (progress == 1f) viewModel.linearProgession()
+    if (music.thumb.isNotBlank() && music.title.isNotBlank()) Container(
+        padding, viewModel,
+    ) {
+        IconButton(onClick = {
+            navHostController.navigate("music")
+        }, modifier = Modifier.size(80.dp)) {
+            if (music.bitImage != null) {
+                music.bitImage?.asImageBitmap()?.let {
+                    Image(
+                        bitmap = it,
+                        contentDescription = music.title,
+                        modifier = Modifier
+                            .background(WhiteTransparent)
 
-    if (music.thumb.isNotBlank() && music.title.isNotBlank()) Container(progress, padding) {
-        IconButton(
-            modifier = Modifier
-                .width(80.dp)
-                .height(70.dp),
-            onClick = {
-                if(!mediaPlayer!!.isPlaying) {
-                    if(mediaPlayer!!.currentPosition / 1000 < 1){
-                        mediaPlayer?.stop()
-                        viewModel?.setMediaPlayer()
-                        val file = Utils().getFile(music.title, musics)
-                        mediaPlayer?.setDataSource(file.path)
-                        mediaPlayer?.prepare()
-                        mediaPlayer?.start()
-                        viewModel?.startTime()
-                        viewModel.setPause(mediaPlayer!!.isPlaying)
-                    }else{
-                        mediaPlayer?.start()
-                    }
+                    )
                 }
-
-                navHostController.navigate("music")
-        }) {
-            AsyncImage(
-                model = music.thumb, contentDescription = null, modifier = Modifier
-
-                    .background(Color.Transparent)
-            )
+            } else {
+                AsyncImage(
+                    modifier = Modifier
+                        .background(WhiteTransparent),
+                    model = music.thumb,
+                    contentDescription = "Imagem da musica ${music.title}"
+                )
+            }
         }
         Column(
             modifier = Modifier
-                .padding(end = 16.dp, top = 5.dp)
+                .padding(start = 9.dp, end = 16.dp, top = 5.dp)
                 .fillMaxHeight(),
         ) {
             Text(
                 color = ColorWhite,
                 text = music.title,
                 fontSize = 16.sp,
-                fontWeight = FontWeight(600)
+                fontWeight = FontWeight(600),
+                modifier = Modifier.widthIn(max = 200.dp, min = 200.dp),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
             Text(
                 text = music.author,
@@ -101,13 +106,16 @@ fun Player(viewModel: ContextMain, padding: PaddingValues, navHostController: Na
             modifier = Modifier.fillMaxHeight(), verticalAlignment = Alignment.CenterVertically
         ) {
             fun moveMusic(direction: String) {
-                val utils = Utils()
-                viewModel.setMediaPlayer()
-                utils.moveMusic(
-                    direction, musics, music, mediaPlayer!!
-                ) { viewModel.setMusic(it) }
+                if (direction == "next") {
+                    val music = player.next()
+                    music?.let { viewModel.setMusic(it) }
+                    viewModel.setPause(player.isPlaying())
+                } else {
+                    val music = player.back()
+                    music?.let { viewModel.setMusic(it) }
+                    viewModel.setPause(player.isPlaying())
+                }
                 viewModel.startTime()
-                viewModel.setPause(mediaPlayer!!.isPlaying)
             }
             IconButton(onClick = {
                 moveMusic("back")
@@ -115,28 +123,24 @@ fun Player(viewModel: ContextMain, padding: PaddingValues, navHostController: Na
                 Icon(
                     modifier = Modifier.width(60.dp),
                     painter = painterResource(id = R.drawable.left),
-                    contentDescription = "Valtar para musica anterior",
+                    contentDescription = stringResource(R.string.valtar_para_musica_anterior),
                     tint = ColorWhite
                 )
             }
-            IconButton(onClick = {
-                if (pause) {
-                    mediaPlayer?.pause()
-                } else {
-                    mediaPlayer?.start()
-                    if (!mediaPlayer!!.isPlaying) {
-                        mediaPlayer?.setDataSource(musics.filter { it.name == "${music.title}.mp4" }[0].path)
-                        mediaPlayer?.prepare()
-                        mediaPlayer?.start()
-                        viewModel.startTime()
-                    }
-                }
-                viewModel.setPause(mediaPlayer!!.isPlaying)
+            IconButton(enabled = loading, onClick = {
+                if (!pause) {
+                    player.start()
+                    viewModel.startTime()
+                } else player.pause()
+                viewModel.setPause(player.isPlaying())
             }) {
                 Icon(
-                    modifier = Modifier.width(60.dp), painter = painterResource(
+                    modifier = Modifier.width(60.dp),
+                    painter = painterResource(
                         id = if (pause) R.drawable.baseline_pause_24 else R.drawable.baseline_play_arrow_24
-                    ), contentDescription = "Pause a musica", tint = ColorWhite
+                    ),
+                    contentDescription = stringResource(R.string.pause_a_musica),
+                    tint = ColorWhite
                 )
             }
             IconButton(onClick = {
@@ -146,28 +150,26 @@ fun Player(viewModel: ContextMain, padding: PaddingValues, navHostController: Na
                     tint = ColorWhite,
                     modifier = Modifier.width(60.dp),
                     painter = painterResource(id = R.drawable.right),
-                    contentDescription = "Ir para musica anterior"
+                    contentDescription = stringResource(R.string.ir_para_musica_anterior)
                 )
             }
         }
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.P)
 @Composable
 private fun Container(
-    progress: Float, padding: PaddingValues, call: @Composable () -> Unit
+    padding: PaddingValues, viewModel: ContextMain, call: @Composable () -> Unit
 ) {
     Column(
         modifier = Modifier
             .padding(padding)
             .fillMaxHeight()
+            .background(BrandColor)
     ) {
-        LinearProgressIndicator(
-            modifier = Modifier.fillMaxWidth(),
-            progress = progress,
-            color = LineColor,
-            trackColor = TrackColor
-        )
+        // Slider para o progresso do áudio
+        Progress(viewModel = viewModel)
         Row(
             modifier = Modifier
                 .fillMaxWidth()

@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit
 
 class Api {
     object YouTube {
-        private const val BASE_URL = "https://2fbf-128-201-181-35.ngrok-free.app/"
+        private const val BASE_URL = "https://ea96-128-201-181-40.ngrok-free.app/"
         private val client = OkHttpClient.Builder()
             .readTimeout(120, TimeUnit.SECONDS)
             .writeTimeout(120, TimeUnit.SECONDS)
