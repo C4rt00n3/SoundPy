@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Music</string>
+    <string name="voltar_para_pagina_principal">Voltar para pagina principal</string>
+    <string name="playing_now">Playing Now</string>
+    <string name="modo_mudo">Modo mudo</string>
+    <string name="repetir_a_musica">Repetir a musica</string>
+    <string name="repitir_somente_1_vezes">repitir somente 1 vezes</string>
+</resources>

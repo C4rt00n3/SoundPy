@@ -1,0 +1,25 @@
+<resources>
+    <string name="app_name">SoundPY@2</string>
+    <string name="procure_sua_musica">Procure sua musica</string>
+    <string name="buscar_musica">Buscar musica</string>
+    <string name="recommended_for_you">Recommended for you</string>
+    <string name="carregando">Carregando...</string>
+    <string name="voltar_para_pagina_principal">Voltar para pagina principal</string>
+    <string name="playing_now">Playing Now</string>
+    <string name="modo_mudo">Modo mudo</string>
+    <string name="repetir_a_musica">Repetir a musica</string>
+    <string name="repitir_somente_1_vezes">repitir somente 1 vezes</string>
+    <string name="baixar_muisica">Baixar muisica</string>
+    <string name="calma_calabreso">Calma calabreso</string>
+    <string name="voltar_para_pagina_anterior">Voltar para pagina anterior</string>
+    <string name="playlist_do_genero">playlist do genero</string>
+    <string name="voltar_pagina">Voltar pagina</string>
+    <string name="pesquisa">Pesquisa...</string>
+    <string name="pequise_musicas">Pequise musicas</string>
+    <string name="pesquisar_use">Pesquisar</string>
+    <string name="procure_por_algo">Procure por algo</string>
+    <string name="valtar_para_musica_anterior">Valtar para musica anterior</string>
+    <string name="pause_a_musica">Pause a musica</string>
+    <string name="ir_para_musica_anterior">Ir para musica anterior</string>
+    <string name="my_musics">My musics</string>
+</resources>
