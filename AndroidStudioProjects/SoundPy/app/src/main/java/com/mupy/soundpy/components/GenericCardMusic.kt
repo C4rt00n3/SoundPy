@@ -40,13 +40,10 @@ import com.mupy.soundpy.ContextMain
 import com.mupy.soundpy.R
 import com.mupy.soundpy.components.menus.MenuGenericCard
 import com.mupy.soundpy.database.Music
-import com.mupy.soundpy.database.MyPlaylists
-import com.mupy.soundpy.database.PlaylistWithMusic
 import com.mupy.soundpy.models.Menu
 import com.mupy.soundpy.ui.theme.ColorWhite
 import com.mupy.soundpy.ui.theme.TextColor2
 import com.mupy.soundpy.ui.theme.WhiteTransparent
-import com.mupy.soundpy.utils.SoundPy
 import com.mupy.soundpy.utils.Utils
 
 @RequiresApi(Build.VERSION_CODES.P)
@@ -67,24 +64,23 @@ fun GenericCardMusic(
         .width(60.dp)
         .height(60.dp)
         .background(WhiteTransparent)
-
+    val isPlaying = music.thumb == musicV?.thumb
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                if (music.url == musicV?.url) ColorWhite.copy(0.05f) else Color.Transparent,
-                ShapeDefaults.Medium
+                if (isPlaying) ColorWhite.copy(0.15f) else Color.Transparent, ShapeDefaults.Medium
             ),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Button(
             onClick = {
-                if (saved.find { it.url == music.url } == null) {
+                if (saved.find { it.thumb == music.thumb } == null) {
                     soundPy?.open(music)
                     navHostController?.navigate("music")
                 } else {
-                    viewModel.run { stream(music = music) }
+                    viewModel.stream(music = music)
                     navHostController?.navigate("music")
                 }
             },

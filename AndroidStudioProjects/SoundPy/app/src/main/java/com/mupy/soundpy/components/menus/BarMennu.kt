@@ -28,7 +28,7 @@ fun BarMenu(viewModel: ContextMain, navHostController: NavHostController) {
         modifier = Modifier
             .fillMaxWidth()
             .height(50.dp)
-            .background(Color.Black),
+            .background(Color.Transparent),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceAround
     ) {

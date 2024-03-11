@@ -17,7 +17,9 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
@@ -36,7 +38,7 @@ import com.mupy.soundpy.ui.theme.WhiteTransparent
 fun SearchInput(
     viewModel: ContextMain, navController: NavHostController
 ) {
-    val searchInput by viewModel.searchInput.observeAsState("")
+    var searchInput by remember { mutableStateOf("") }
     val width = LocalConfiguration.current.screenWidthDp
     val colors = TextFieldDefaults.colors(
         focusedContainerColor = WhiteTransparent,
@@ -49,13 +51,13 @@ fun SearchInput(
 
     fun confirme() {
         viewModel.searchYoutube(searchInput)
-        // navController.navigate("search")
     }
 
     TextField(
         value = searchInput,
         onValueChange = {
-            viewModel.setSearchInput(it)
+            searchInput = it
+
         },
         modifier = Modifier
             .height(60.dp)

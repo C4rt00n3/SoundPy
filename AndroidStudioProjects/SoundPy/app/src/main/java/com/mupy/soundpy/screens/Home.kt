@@ -86,7 +86,10 @@ fun Home(
         if (principalPlaylist.isNotEmpty()) LazyRow {
             items(principalPlaylist.size) { index ->
                 CardMusic(music = principalPlaylist[index], onClick = {
-                    if (it.url != music?.url) soundPy?.open(it)
+                    if (it.thumb != music?.thumb) {
+                        soundPy?.player?.play()
+                        soundPy?.open(it)
+                    }
                     navController.navigate("music")
                 }) {
                     viewModel.deleteMusic(it) {
@@ -127,38 +130,3 @@ fun HomePreview() {
         )
     }
 }
-
-/*
-    val playlist by viewModel.playListsCards.observeAsState(mutableListOf())
-    val myPlaylist by viewModel.myPlaylist.observeAsState(arrayOf())
-    val soundPy by viewModel.soundPy.observeAsState(
-        SoundPy(
-            context,
-            PlaylistWithMusic(MyPlaylists(0, null, "Carregando"), mutableListOf()),
-            viewModel
-        )
-    )
-    *//*if (playlist.isNotEmpty()) LazyRow {
-            items(playlist.toList()) {
-                PlaylistCard(playListData = it) {
-                    viewModel.fetchPlaylist(it.link)
-                    viewModel.setPlaylisData(it)
-                    navController.navigate("playlist")
-                }
-            }
-        }
-     *//*
-if (myPlaylist.isNotEmpty()) {
-                val my = if (soundPy.order == "DESC") myPlaylist[0].music.reversed()
-                else myPlaylist[0].music.toList()
-                for (music in my) {
-                    CardMusic(music = music) {
-                        soundPy.player.pause()
-                        viewModel.setCurrentPlaylist(null)
-                        soundPy.open(it)
-                        soundPy.player.play()
-                        navController.navigate("music")
-                    }
-                }
-            }
-*/

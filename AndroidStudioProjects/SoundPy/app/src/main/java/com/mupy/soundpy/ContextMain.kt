@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import androidx.palette.graphics.Palette
 import com.mupy.soundpy.database.AppDatabase
 import com.mupy.soundpy.database.Music
 import com.mupy.soundpy.database.MyPlaylists
@@ -33,9 +34,6 @@ class ContextMain(
     private val utils = Utils()
     private var playlistImage: ByteArray? = null
 
-    private val _searchInput = MutableLiveData("")
-    val searchInput: LiveData<String> = _searchInput
-
     private val _currentPlaylist = MutableLiveData<PlaylistWithMusic?>(null)
     private val currentPlaylist: LiveData<PlaylistWithMusic?> = _currentPlaylist
 
@@ -51,6 +49,9 @@ class ContextMain(
         )
     )
     val soundPy: LiveData<SoundPy> = _soundPy
+
+    private val _palette = MutableLiveData<Palette?>(null)
+    val palette: LiveData<Palette?> = _palette
 
     private val _pause = MutableLiveData(_soundPy.value?.player?.isPlaying == true)
     val pause: LiveData<Boolean> = _pause
@@ -140,17 +141,13 @@ class ContextMain(
         playlistImage = image
     }
 
-    /*fun updateMusic(music: Music) {
-        viewModelScope.launch {
-            dataBase?.service()?.updateMusic(music.bitImage, music.thumb)
-            dataBase?.service()?.pickMusic(music.thumb).let {
-                println(it)
-            }
-        }
-    }*/
-
     fun setMusic(m: Music?) {
         _music.value = m
+        if (m?.bitImage != null) m.bitImage?.let { byte ->
+            utils.toBitmap(byte)?.let {
+                _palette.value = Palette.from(it).generate()
+            }
+        }
     }
 
     fun setMute(boolean: Boolean) {
@@ -171,16 +168,20 @@ class ContextMain(
         _showModal.value = boolean
     }
 
+    fun setCurrentPosition(int: Int) {
+        _currentPosition.value = int
+    }
+
     @RequiresApi(Build.VERSION_CODES.P)
     fun startTime() {
         viewModelScope.launch {
+            val duration = _soundPy.value?.duration()?.toFloat() ?: 0f
             while (_pause.value == true) {
                 setProgress(0f)
                 val currentPosition = _soundPy.value?.player?.currentPosition?.toInt() ?: 0
                 _currentPosition.value = currentPosition
                 setProgress(
-                    (currentPosition.toFloat() / 1000f) / ((_soundPy.value?.player?.duration?.toFloat()
-                        ?: 0f) / 1000f)
+                    (currentPosition.toFloat() / 1000f) / ((duration) / 1000f)
                 )
                 delay(1000)
             }
@@ -204,10 +205,6 @@ class ContextMain(
             getFiles()
             this.cancel()
         }
-    }
-
-    fun setSearchInput(string: String) {
-        _searchInput.value = string
     }
 
     fun setProgress(float: Float) {
@@ -320,7 +317,7 @@ class ContextMain(
         }
     }
 
-    fun getFiles() {
+    private fun getFiles() {
         viewModelScope.launch {
             try {
                 recoilPlaylists()

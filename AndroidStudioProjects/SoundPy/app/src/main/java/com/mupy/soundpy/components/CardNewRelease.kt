@@ -18,7 +18,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -61,11 +60,13 @@ fun CardNewRelease(
         ImageComponent(
             linkThumb = playListData.thumb,
             byteArray = null,
-            contentScale = ContentScale.Companion.Crop,
             modifier = Modifier
-                .width(130.dp)
-                .height(145.dp)
-                .background(WhiteTransparent, ShapeDefaults.Medium),
+                .width(150.dp)
+                .height(165.dp)
+                .background(
+                    WhiteTransparent,
+                    ShapeDefaults.Medium
+                ),
         )
         Spacer(modifier = Modifier.width(16.dp))
         Column {

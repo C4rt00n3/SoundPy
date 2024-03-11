@@ -123,7 +123,6 @@ class Utils {
         return getMusicFiles(context) {}.map { fileToMusic(it, context) }.toTypedArray()
     }
 
-
     fun getMusicFiles(context: Context, call: () -> Unit): MutableList<File> {
         return try {
             call()

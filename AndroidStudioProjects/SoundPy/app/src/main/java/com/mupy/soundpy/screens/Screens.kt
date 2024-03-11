@@ -5,19 +5,22 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.mupy.soundpy.ContextMain
 import com.mupy.soundpy.components.Header
 import com.mupy.soundpy.components.Modal
@@ -31,6 +34,22 @@ import com.mupy.soundpy.components.menus.BarMenu
 fun Screens(
     navController: NavHostController, context: Context, viewModel: ContextMain
 ) {
+    val currentBackStackEntry by navController.currentBackStackEntryAsState()
+    val palette by viewModel.palette.observeAsState(null)
+    val currentRoute = currentBackStackEntry?.destination?.route ?: ""
+
+    // A surface container using the 'background' color from the theme
+    val systemUiController = rememberSystemUiController()
+
+    systemUiController.setSystemBarsColor(
+        color = if (currentRoute != "music") Color.Black else Color(
+            palette?.getDarkVibrantColor(
+                Color.Black.hashCode()
+            ) ?: 0
+        )
+    )
+
+
     Scaffold(
         // floatingActionButton = { ToastComp(viewModel = viewModel) },
         topBar = {
@@ -51,8 +70,8 @@ fun Screens(
         bottomBar = {
             Column(
                 modifier = Modifier
+                    .background(if (currentRoute == "music") Color.Transparent else Color.Black)
                     .padding(horizontal = 9.dp)
-                    .background(Color.Black)
             ) {
                 Player(viewModel = viewModel, navController = navController)
                 BarMenu(
@@ -60,43 +79,42 @@ fun Screens(
                 )
             }
         },
-        content = { padding ->
-            Modal(viewModel = viewModel)
-            NavHost(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight()
-                    .background(Color.Black)
-                    .padding(),
-                navController = navController,
-                startDestination = "home"
-            ) {
-                composable("home") {
-                    Home(viewModel, navController, context, padding)
-                }
-                composable("music") {
-                    MusicScreen(viewModel, context)
-                }
-                composable("playlist") {
-                    PlaylistScreen(
-                        viewModel = viewModel, navController, context
-                    )
-                }
-                composable("search") {
-                    SearchScreen(
-                        viewModel = viewModel, navHostController = navController, context = context
-                    )
-                }
-                composable("favorites") {
-                    MyMusicsScreen(
-                        context = context, navHostController = navController, viewModel = viewModel
-                    )
-                }
+    ) { padding ->
+        Modal(viewModel = viewModel)
+        NavHost(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight()
+                .background(Color.Black)
+                .padding(),
+            navController = navController,
+            startDestination = "home"
+        ) {
+            composable("home") {
+                Home(viewModel, navController, context, padding)
             }
-            Permission(
-                viewModel = viewModel,
-                // context = context
-            )
-        },
-    )
+            composable("music") {
+                MusicScreen(viewModel, context)
+            }
+            composable("playlist") {
+                PlaylistScreen(
+                    viewModel = viewModel, navController, context
+                )
+            }
+            composable("search") {
+                SearchScreen(
+                    viewModel = viewModel, navHostController = navController, context = context
+                )
+            }
+            composable("favorites") {
+                MyMusicsScreen(
+                    context = context, navHostController = navController, viewModel = viewModel
+                )
+            }
+        }
+        Permission(
+            viewModel = viewModel,
+            // context = context
+        )
+    }
 }

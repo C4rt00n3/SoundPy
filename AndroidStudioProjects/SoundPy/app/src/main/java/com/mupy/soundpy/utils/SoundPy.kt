@@ -36,12 +36,14 @@ class SoundPy(
         @RequiresApi(Build.VERSION_CODES.P)
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
             super.onMediaItemTransition(mediaItem, reason)
-            while (player.isPlaying) {
+            if (reason != Player.MEDIA_ITEM_TRANSITION_REASON_SEEK) {
                 player.pause()
-            }
-            if (!player.isPlaying) {
-                player.play()
+                if (!player.isPlaying) player.play()
                 viewModel.setMusic(getMetadata(mediaItem?.mediaMetadata))
+                viewModel.run {
+                    setProgress(0f)
+                    setCurrentPosition(0)
+                }
             }
         }
 
@@ -59,6 +61,10 @@ class SoundPy(
 
     init {
         init(playlist)
+    }
+
+    fun duration(): Long {
+        return player.duration
     }
 
     fun orderBy() {
