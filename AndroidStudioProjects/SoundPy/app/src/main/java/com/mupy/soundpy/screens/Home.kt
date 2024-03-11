@@ -35,6 +35,7 @@ import com.mupy.soundpy.components.CardMusic
 import com.mupy.soundpy.components.ImageCarousel
 import com.mupy.soundpy.components.Title
 import com.mupy.soundpy.database.Music
+import com.mupy.soundpy.database.MyPlaylists
 import com.mupy.soundpy.models.Artist
 import com.mupy.soundpy.ui.theme.SoundPyTheme
 
@@ -101,10 +102,10 @@ fun Home(
             }
         }
         ImageCarousel(playListsCards, navController, viewModel)
-        Title(text = stringResource(R.string.your_favorite_artists))
+        Title(text = stringResource(id = R.string.minhas_playlists))
         LazyRow {
-            items(artistPlaylist.toList()) { artist ->
-                ArtistCard(artist = artist)
+            items(myPlaylist) { playlist ->
+                ArtistCard(playlist)
             }
         }
 

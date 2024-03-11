@@ -13,21 +13,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mupy.soundpy.database.PlaylistWithMusic
 import com.mupy.soundpy.models.Artist
 import com.mupy.soundpy.ui.theme.ColorWhite
 
 @Composable
-fun ArtistCard(artist: Artist) {
+fun ArtistCard(playlistWithMusic: PlaylistWithMusic) {
     Column(
         modifier = Modifier.padding(end = 16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        val music = playlistWithMusic.music.getOrNull(0)
         ImageComponent(
-            linkThumb = artist.uriThumb,
-            byteArray = artist.byteImage,
+            linkThumb = music?.thumb ?: "",
+            byteArray = music?.bitImage,
             modifier = Modifier
                 .size(128.dp)
                 .clip(
@@ -36,10 +39,12 @@ fun ArtistCard(artist: Artist) {
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = artist.artistName,
+            text = playlistWithMusic.playlist.name ?: "",
             fontSize = 12.sp,
             color = ColorWhite,
             fontWeight = FontWeight.Bold
         )
     }
 }
+
+

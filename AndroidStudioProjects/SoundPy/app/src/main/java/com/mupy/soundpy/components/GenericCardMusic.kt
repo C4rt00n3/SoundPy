@@ -65,6 +65,7 @@ fun GenericCardMusic(
         .height(60.dp)
         .background(WhiteTransparent)
     val isPlaying = music.thumb == musicV?.thumb
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -76,13 +77,13 @@ fun GenericCardMusic(
     ) {
         Button(
             onClick = {
-                if (saved.find { it.thumb == music.thumb } == null) {
+                val find = saved.indexOfFirst { it.thumb == music.thumb } != -1
+                if (find) {
                     soundPy?.open(music)
-                    navHostController?.navigate("music")
                 } else {
                     viewModel.stream(music = music)
-                    navHostController?.navigate("music")
                 }
+                navHostController?.navigate("music")
             },
             shape = RectangleShape,
             colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),

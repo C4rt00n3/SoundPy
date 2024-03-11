@@ -26,12 +26,19 @@ fun ImageComponent(
         contentScale = contentScale,
         modifier = modifier
     )
-    else if (byteArray == null) AsyncImage(
+    else if (byteArray == null && linkThumb.isNotBlank()) AsyncImage(
         model = linkThumb,
         contentDescription = contentDescription,
         contentScale = contentScale,
         modifier = modifier
     )
+    else if(linkThumb.isBlank() && byteArray == null)
+        Image(
+            painter = painterResource(id = R.mipmap.deadpoll),
+            contentDescription = contentDescription,
+            contentScale = contentScale,
+            modifier = modifier
+        )
     else utils.toBitmap(byteArray)?.let {
         Image(
             bitmap = it.asImageBitmap(),

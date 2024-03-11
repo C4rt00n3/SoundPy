@@ -35,7 +35,6 @@ import com.mupy.soundpy.ContextMain
 import com.mupy.soundpy.components.GenericCardMusic
 import com.mupy.soundpy.database.Music
 import com.mupy.soundpy.models.Musics
-import com.mupy.soundpy.ui.theme.BrandColor
 import com.mupy.soundpy.ui.theme.ColorWhite
 import com.mupy.soundpy.ui.theme.SoundPyTheme
 import com.mupy.soundpy.ui.theme.TextColor2
@@ -46,7 +45,7 @@ fun SearchScreen(
     viewModel: ContextMain, navHostController: NavHostController, context: Context
 ) {
     val searchYoutube by viewModel.searchYoutube.observeAsState(Musics(listOf()))
-    var musics by remember { mutableStateOf(searchYoutube.results.toMutableList()) }
+    var musics by remember { mutableStateOf(mutableListOf<Music>()) }
 
     fun remove(music: Music) {
         musics = musics.filter { it.id != music.id }.toMutableList()
@@ -100,6 +99,7 @@ fun SearchScreen(
             }
         }
     }
+    musics = searchYoutube.results.toMutableList()
 }
 
 @RequiresApi(Build.VERSION_CODES.P)

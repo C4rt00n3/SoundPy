@@ -49,8 +49,13 @@ fun SearchInput(
         unfocusedIndicatorColor = Color.Transparent,
     )
 
-    fun confirme() {
-        viewModel.searchYoutube(searchInput)
+    var copy = ""
+
+    fun confirm() {
+        if(copy.isBlank() || searchInput != copy) {
+            viewModel.searchYoutube(searchInput)
+            copy = searchInput
+        }
     }
 
     TextField(
@@ -76,7 +81,7 @@ fun SearchInput(
         },
         maxLines = 1,
         trailingIcon = {
-            IconButton(onClick = { confirme() }) {
+            IconButton(onClick = { confirm() }) {
                 Icon(
                     Icons.Filled.Search,
                     modifier = Modifier.width(60.dp),
@@ -86,7 +91,7 @@ fun SearchInput(
             }
         },
         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
-        keyboardActions = KeyboardActions(onDone = { confirme() }),
+        keyboardActions = KeyboardActions(onDone = { confirm() }),
         textStyle = TextStyle(color = TextColor2.copy(1f))
     )
 }

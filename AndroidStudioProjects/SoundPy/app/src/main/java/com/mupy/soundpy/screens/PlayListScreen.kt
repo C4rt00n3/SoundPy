@@ -72,7 +72,6 @@ fun PlaylistScreen(
         //.verticalScroll(ScrollState(0))
         , horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(60.dp))
         TopPlaylistCard(playlistData) {
             navHostController.navigateUp()
         }

@@ -50,6 +50,7 @@ open class ApiViewModel : ViewModel() {
             try {
                 val result = repository.search(params)
                 _searchYoutube.value = result
+                println(result)
             } catch (e: Exception) {
                 Log.d("EXC", "fetchYoutube: ${e.message.toString()}")
             } finally {
